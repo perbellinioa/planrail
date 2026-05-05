@@ -12,7 +12,7 @@ import { safeParsePlan } from "../src/state.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLAN_PATH = process.argv[2] || join(__dirname, "..", "examples", "fullstack-plan.yml");
-const MODEL = process.argv[3] || process.env.LLM_MODEL || "openai/gpt-4o";
+const MODEL = process.argv[3] || process.env.LLM_MODEL || "claude-opus-4.7";
 
 async function main() {
   console.log(`\n🚂 planrail benchmark`);

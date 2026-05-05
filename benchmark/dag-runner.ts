@@ -69,7 +69,15 @@ IMPORTANT: Output each file using this EXACT format — the filepath must be on 
 
 Use the exact file paths mentioned in the task. Only create files relevant to THIS task.`;
 
-      const result = await llm.call(prompt);
+      let result;
+      try {
+        result = await llm.call(prompt);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        failNode(dag, nodeId, msg);
+        nodeResults[nodeId] = { status: "llm_error", files: [] };
+        continue;
+      }
 
       // Parse and write files
       const files = parseFiles(result.response);

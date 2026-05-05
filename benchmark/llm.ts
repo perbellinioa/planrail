@@ -1,4 +1,3 @@
-import OpenAI from "openai";
 import { execSync } from "node:child_process";
 
 export interface LlmCall {
@@ -16,21 +15,8 @@ export interface LlmClient {
   calls(): LlmCall[];
 }
 
-function getGitHubToken(): string {
-  try {
-    return execSync("gh auth token", { encoding: "utf-8" }).trim();
-  } catch {
-    throw new Error("Failed to get GitHub token. Run 'gh auth login' first.");
-  }
-}
-
 export function createLlmClient(model?: string): LlmClient {
-  // Default: GitHub Models API with gh auth token
-  const apiKey = process.env.OPENAI_API_KEY || getGitHubToken();
-  const baseURL = process.env.LLM_BASE_URL || "https://models.github.ai/inference";
-  const resolvedModel = model || process.env.LLM_MODEL || "openai/gpt-4o";
-
-  const client = new OpenAI({ apiKey, baseURL });
+  const resolvedModel = model || process.env.LLM_MODEL || "claude-opus-4.7";
   const history: LlmCall[] = [];
 
   return {
@@ -38,18 +24,45 @@ export function createLlmClient(model?: string): LlmClient {
 
     async call(prompt: string): Promise<LlmCall> {
       const start = Date.now();
-      const response = await client.chat.completions.create({
-        model: resolvedModel,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0,
-        max_tokens: 4096,
-      });
+
+      // Use Copilot CLI in non-interactive mode
+      const escapedPrompt = prompt.replace(/'/g, "'\\''");
+      let response: string;
+      try {
+        // Redirect stderr to stdout to capture Copilot CLI footer (token info)
+        response = execSync(
+          `copilot -p '${escapedPrompt}' --model ${resolvedModel} 2>&1`,
+          { encoding: "utf-8", maxBuffer: 1024 * 1024, timeout: 300_000 },
+        );
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        throw new Error(`Copilot CLI call failed: ${msg}`);
+      }
+
+      // Parse token info from Copilot CLI footer (e.g. "Tokens    ↑ 1.2k • ↓ 500 • 0 (cached)")
+      // Match the last Tokens line (there may be multiple from Copilot session info)
+      const tokenLines = response.match(/Tokens\s+.+/g);
+      let inputTokens = 0;
+      let outputTokens = 0;
+      if (tokenLines) {
+        const lastLine = tokenLines[tokenLines.length - 1];
+        const numbers = lastLine.match(/([\d.]+k?)/g);
+        if (numbers && numbers.length >= 2) {
+          inputTokens = parseTokenCount(numbers[0]);
+          outputTokens = parseTokenCount(numbers[1]);
+        }
+      }
+
+      // Strip the Copilot CLI footer (Changes/Requests/Tokens lines)
+      const cleanResponse = response
+        .replace(/\n*Changes\s+\+\d+\s+-\d+[\s\S]*$/, "")
+        .trim();
 
       const result: LlmCall = {
         prompt,
-        response: response.choices[0]?.message?.content || "",
-        input_tokens: response.usage?.prompt_tokens || 0,
-        output_tokens: response.usage?.completion_tokens || 0,
+        response: cleanResponse,
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
         duration_ms: Date.now() - start,
       };
       history.push(result);
@@ -66,6 +79,13 @@ export function createLlmClient(model?: string): LlmClient {
       return history;
     },
   };
+}
+
+function parseTokenCount(s: string): number {
+  if (s.endsWith("k")) {
+    return Math.round(parseFloat(s.slice(0, -1)) * 1000);
+  }
+  return parseInt(s, 10) || 0;
 }
 
 export function parseFiles(response: string): Map<string, string> {

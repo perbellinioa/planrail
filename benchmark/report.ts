@@ -16,6 +16,8 @@ export interface BenchmarkReport {
   comparison: {
     baseline_adherence: string;
     dag_adherence: string;
+    baseline_output_tokens: number;
+    dag_output_tokens: number;
     token_diff: string;
     token_savings_pct: string;
     baseline_files: number;
@@ -36,6 +38,8 @@ export function buildReport(
 
   const bTokens = baselineResult.tokens.total;
   const dTokens = dagResult.tokens.total;
+  const bOutput = baselineResult.tokens.output;
+  const dOutput = dagResult.tokens.output;
   const savings = bTokens > 0 ? ((bTokens - dTokens) / bTokens) * 100 : 0;
 
   return {
@@ -46,6 +50,8 @@ export function buildReport(
     comparison: {
       baseline_adherence: `${bPassed}/${total} (${Math.round((bPassed / total) * 100)}%)`,
       dag_adherence: `${dPassed}/${total} (${Math.round((dPassed / total) * 100)}%)`,
+      baseline_output_tokens: bOutput,
+      dag_output_tokens: dOutput,
       token_diff: `${bTokens} vs ${dTokens}`,
       token_savings_pct: `${savings > 0 ? "+" : ""}${savings.toFixed(1)}%`,
       baseline_files: baselineResult.files_generated.length,
@@ -71,11 +77,14 @@ export function formatReport(report: BenchmarkReport): string {
 | Metric              | Baseline (no DAG) | With planrail     |
 |---------------------|-------------------|-------------------|
 | Plan adherence      | ${c.baseline_adherence.padEnd(17)} | ${c.dag_adherence.padEnd(17)} |
-| Total tokens        | ${String(b.result.tokens.total).padEnd(17)} | ${String(d.result.tokens.total).padEnd(17)} |
-| Token savings       | —                 | ${c.token_savings_pct.padEnd(17)} |
+| Output tokens       | ${String(c.baseline_output_tokens).padEnd(17)} | ${String(c.dag_output_tokens).padEnd(17)} |
 | LLM calls           | ${String(b.result.llm_calls).padEnd(17)} | ${String(d.result.llm_calls).padEnd(17)} |
 | Files generated     | ${String(c.baseline_files).padEnd(17)} | ${String(c.dag_files).padEnd(17)} |
 | Duration            | ${(b.result.duration_ms / 1000).toFixed(1)}s${" ".repeat(14 - (b.result.duration_ms / 1000).toFixed(1).length)} | ${(d.result.duration_ms / 1000).toFixed(1)}s${" ".repeat(14 - (d.result.duration_ms / 1000).toFixed(1).length)} |
+
+> **Note:** Output tokens measure actual generated content. Input tokens are not
+> compared because multi-call DAG execution includes per-call system prompt overhead
+> that single-call baseline does not.
 
 ### Verification Details
 
