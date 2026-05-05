@@ -1,0 +1,183 @@
+{
+  "model": "openai/gpt-4o",
+  "timestamp": "2026-05-05T17:02:11.962Z",
+  "baseline": {
+    "result": {
+      "plan_id": "fullstack-api",
+      "mode": "baseline",
+      "tokens": {
+        "input": 500,
+        "output": 2294,
+        "total": 2794
+      },
+      "llm_calls": 1,
+      "duration_ms": 12245,
+      "files_generated": [
+        "prisma/schema.prisma",
+        "openapi.yml",
+        "src/auth/index.ts",
+        "src/db/index.ts",
+        "src/routes/index.ts",
+        "src/middleware/error.ts",
+        "src/middleware/validate.ts",
+        "tests/api.test.ts",
+        "README.md"
+      ]
+    },
+    "verification": [
+      {
+        "node_id": "schema",
+        "passed": true
+      },
+      {
+        "node_id": "api-contract",
+        "passed": true
+      },
+      {
+        "node_id": "auth-module",
+        "passed": true
+      },
+      {
+        "node_id": "data-layer",
+        "passed": true
+      },
+      {
+        "node_id": "routes",
+        "passed": true
+      },
+      {
+        "node_id": "middleware",
+        "passed": true
+      },
+      {
+        "node_id": "tests",
+        "passed": false,
+        "reason": "Command verification skipped in benchmark"
+      },
+      {
+        "node_id": "docs",
+        "passed": false,
+        "reason": "File \"README.md\" missing pattern: \"## API Endpoints\""
+      }
+    ]
+  },
+  "dag": {
+    "result": {
+      "plan_id": "fullstack-api",
+      "mode": "dag",
+      "tokens": {
+        "input": 2499,
+        "output": 3831,
+        "total": 6330
+      },
+      "llm_calls": 8,
+      "duration_ms": 27997,
+      "files_generated": [
+        "prisma/schema.prisma",
+        "openapi.yml",
+        "src/db/index.ts",
+        "src/auth/index.ts",
+        "src/routes/index.ts",
+        "src/middleware/error.ts",
+        "src/middleware/validate.ts",
+        "tests/api.test.ts",
+        "README.md"
+      ],
+      "node_results": {
+        "schema": {
+          "status": "done",
+          "files": [
+            "prisma/schema.prisma"
+          ]
+        },
+        "api-contract": {
+          "status": "done",
+          "files": [
+            "openapi.yml"
+          ]
+        },
+        "data-layer": {
+          "status": "done",
+          "files": [
+            "src/db/index.ts"
+          ]
+        },
+        "auth-module": {
+          "status": "done",
+          "files": [
+            "src/auth/index.ts"
+          ]
+        },
+        "routes": {
+          "status": "done",
+          "files": [
+            "src/routes/index.ts"
+          ]
+        },
+        "middleware": {
+          "status": "done",
+          "files": [
+            "src/middleware/error.ts",
+            "src/middleware/validate.ts"
+          ]
+        },
+        "tests": {
+          "status": "done",
+          "files": [
+            "tests/api.test.ts"
+          ]
+        },
+        "docs": {
+          "status": "done",
+          "files": [
+            "README.md"
+          ]
+        }
+      }
+    },
+    "verification": [
+      {
+        "node_id": "schema",
+        "passed": true
+      },
+      {
+        "node_id": "api-contract",
+        "passed": true
+      },
+      {
+        "node_id": "auth-module",
+        "passed": true
+      },
+      {
+        "node_id": "data-layer",
+        "passed": true
+      },
+      {
+        "node_id": "routes",
+        "passed": true
+      },
+      {
+        "node_id": "middleware",
+        "passed": true
+      },
+      {
+        "node_id": "tests",
+        "passed": false,
+        "reason": "Command verification skipped in benchmark"
+      },
+      {
+        "node_id": "docs",
+        "passed": false,
+        "reason": "File \"README.md\" missing pattern: \"## API Endpoints\""
+      }
+    ]
+  },
+  "comparison": {
+    "baseline_adherence": "6/8 (75%)",
+    "dag_adherence": "6/8 (75%)",
+    "token_diff": "2794 vs 6330",
+    "token_savings_pct": "-126.6%",
+    "baseline_files": 9,
+    "dag_files": 9
+  }
+}

@@ -2,19 +2,32 @@
   "name": "planrail",
   "version": "0.1.0",
   "description": "Minimal MCP server that enforces DAG-based plan execution for LLM agent fleets. Local, private, zero network calls.",
-  "keywords": ["mcp", "dag", "orchestrator", "llm", "agent", "plan", "guardrails"],
+  "keywords": [
+    "mcp",
+    "dag",
+    "orchestrator",
+    "llm",
+    "agent",
+    "plan",
+    "guardrails"
+  ],
   "license": "MIT",
   "type": "module",
   "bin": {
     "planrail": "./dist/index.js"
   },
   "main": "./dist/index.js",
-  "files": ["dist/", "README.md", "LICENSE"],
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "benchmark": "npx tsx benchmark/run.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -25,6 +38,8 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.3",
+    "openai": "^6.36.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   },
   "engines": {
