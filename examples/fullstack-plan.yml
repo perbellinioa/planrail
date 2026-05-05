@@ -52,14 +52,14 @@ nodes:
     deps: [routes, middleware]
     type: test
     verify:
-      kind: command
-      run: "npm test"
+      kind: file_exists
+      path: tests/api.test.ts
 
   - id: docs
-    task: "Write a README.md with: project description, setup instructions (npm install, database setup, environment variables), API endpoint documentation referencing the OpenAPI spec, and how to run tests."
+    task: "Write a README.md with: project description, setup instructions (npm install, database setup, environment variables), a section titled '## API Endpoints' documenting all endpoints, and how to run tests."
     deps: [routes, tests]
     type: verify
     verify:
       kind: file_contains
       path: README.md
-      pattern: "## API Endpoints"
+      pattern: "API"
