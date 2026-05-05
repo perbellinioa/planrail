@@ -1,0 +1,15 @@
+required_node_types:
+  - type: schema
+    description: "Data model definition (database schema, types, etc.)"
+  - type: contract
+    description: "API interface definition (OpenAPI spec, GraphQL schema, type definitions)"
+  - type: test
+    description: "Test nodes that verify implementation correctness"
+
+required_patterns:
+  - name: contract-before-consumers
+    description: "Every implementation node with 2+ downstream consumers should be marked as type 'contract'"
+  - name: tests-at-leaves
+    description: "Every branch in the DAG should terminate with a test or verification node"
+  - name: verify-all-nodes
+    description: "Every node must have a verify criterion — no unverifiable nodes allowed"

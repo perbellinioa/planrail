@@ -1,0 +1,65 @@
+plan_id: fullstack-api
+version: 1
+max_retries: 3
+
+nodes:
+  - id: schema
+    task: "Design a users table with fields: id (UUID), email (unique), password_hash, role (admin|user), created_at, updated_at. Create prisma/schema.prisma with the User model."
+    deps: []
+    verify:
+      kind: file_contains
+      path: prisma/schema.prisma
+      pattern: "model User"
+
+  - id: api-contract
+    task: "Define an OpenAPI 3.0 spec in openapi.yml with endpoints: POST /auth/register, POST /auth/login, GET /users/:id, PATCH /users/:id. Reference the User schema from the schema node."
+    deps: [schema]
+    type: contract
+    verify:
+      kind: file_exists
+      path: openapi.yml
+
+  - id: auth-module
+    task: "Implement JWT authentication in src/auth/index.ts. Export functions: register(email, password), login(email, password), and authMiddleware. Use bcrypt for password hashing. Token expiry: 24h."
+    deps: [api-contract]
+    verify:
+      kind: file_exists
+      path: src/auth/index.ts
+
+  - id: data-layer
+    task: "Implement database access in src/db/index.ts. Export CRUD functions for the User model: createUser, getUserById, updateUser. Use the schema from the schema node."
+    deps: [schema]
+    verify:
+      kind: file_exists
+      path: src/db/index.ts
+
+  - id: routes
+    task: "Implement Express route handlers in src/routes/index.ts matching the OpenAPI spec exactly. Wire up auth-module for /auth/* and data-layer for /users/*."
+    deps: [api-contract, auth-module, data-layer]
+    verify:
+      kind: file_exists
+      path: src/routes/index.ts
+
+  - id: middleware
+    task: "Implement error handling middleware in src/middleware/error.ts and request validation in src/middleware/validate.ts. The error handler should return JSON errors with appropriate HTTP status codes."
+    deps: [routes]
+    verify:
+      kind: file_exists
+      path: src/middleware/error.ts
+
+  - id: tests
+    task: "Write integration tests in tests/api.test.ts covering: user registration, login, token validation, get user, update user, and error cases (duplicate email, invalid token, not found)."
+    deps: [routes, middleware]
+    type: test
+    verify:
+      kind: command
+      run: "npm test"
+
+  - id: docs
+    task: "Write a README.md with: project description, setup instructions (npm install, database setup, environment variables), API endpoint documentation referencing the OpenAPI spec, and how to run tests."
+    deps: [routes, tests]
+    type: verify
+    verify:
+      kind: file_contains
+      path: README.md
+      pattern: "## API Endpoints"

@@ -1,0 +1,28 @@
+plan_id: hello-world
+version: 1
+max_retries: 2
+
+nodes:
+  - id: greet
+    task: "Create a file called hello.txt containing 'Hello, World!'"
+    deps: []
+    verify:
+      kind: file_contains
+      path: hello.txt
+      pattern: "Hello, World!"
+
+  - id: uppercase
+    task: "Create a file called upper.txt containing the uppercased content of hello.txt"
+    deps: [greet]
+    verify:
+      kind: file_contains
+      path: upper.txt
+      pattern: "HELLO, WORLD!"
+
+  - id: check
+    task: "Verify both files exist and contain expected content"
+    deps: [uppercase]
+    type: verify
+    verify:
+      kind: command
+      run: "test -f hello.txt && test -f upper.txt"
